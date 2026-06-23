@@ -4,19 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emre Sakarya — Nuclear Engineering</title>
-  <link rel="stylesheet" href="style.css?v=6" />
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-<!-- SCROLL PROGRESS BAR -->
-<div id="scroll-progress"></div>
-
-<!-- CURSOR SPOTLIGHT -->
-<div id="spotlight"></div>
-
-<!-- FISSION CHAIN REACTION CANVAS -->
-<canvas id="reactor-canvas"></canvas>
+<!-- ANIMATED PARTICLE BACKGROUND -->
+<canvas id="particle-canvas"></canvas>
 
 <!-- NAV -->
 <nav id="navbar">
@@ -33,40 +27,33 @@
 <!-- HERO -->
 <section id="hero">
   <div class="hero-content">
-    <p class="hero-greeting">// Hi there, I'm</p>
+    <p class="hero-greeting">Hi there, I'm</p>
     <h1 class="hero-name">Emre Sakarya</h1>
     <div class="hero-typing">
-      <span id="typed-text"></span><span class="cursor">_</span>
+      <span id="typed-text"></span><span class="cursor">|</span>
     </div>
     <p class="hero-desc">
       Senior <strong>Nuclear Engineering</strong> student at Hacettepe University.<br>
-      I bridge theoretical physics and software to solve complex engineering problems —
+      I bridge theoretical physics and software to solve complex engineering problems —<br>
       from reactor kinetics to full-bundle CFD simulations.
     </p>
     <div class="hero-btns">
-      <a href="#projects" class="btn btn-primary">View Projects <span class="arrow">→</span></a>
+      <a href="#projects" class="btn btn-primary">View Projects</a>
       <a href="https://github.com/EmreSakarya" target="_blank" class="btn btn-outline">GitHub</a>
     </div>
   </div>
 
-  <!-- 3D ATOM -->
-  <div class="reactor">
-    <div class="core-glow"></div>
-    <canvas id="atom-canvas" width="460" height="460"></canvas>
+  <!-- ORBITING ATOM -->
+  <div class="atom">
+    <div class="nucleus"></div>
+    <div class="orbit orbit-1"><span class="electron"></span></div>
+    <div class="orbit orbit-2"><span class="electron"></span></div>
+    <div class="orbit orbit-3"><span class="electron"></span></div>
   </div>
 
+  <div class="hero-bg-glow"></div>
   <a href="#about" class="scroll-down"><span></span></a>
 </section>
-
-<!-- STATS BAR -->
-<div class="stats-bar">
-  <div class="container stats-grid">
-    <div class="stat"><span class="stat-num" data-target="11">0</span><span class="stat-label">Engineering Projects</span></div>
-    <div class="stat"><span class="stat-num" data-target="2">0</span><span class="stat-label">CFD Solvers Mastered</span></div>
-    <div class="stat"><span class="stat-num" data-target="4">0</span><span class="stat-label">Domains Covered</span></div>
-    <div class="stat"><span class="stat-num" data-target="100" data-suffix="%">0</span><span class="stat-label">Computation Driven</span></div>
-  </div>
-</div>
 
 <!-- ABOUT / STACK -->
 <section id="about">
@@ -134,8 +121,7 @@
 
       <div class="project-cards">
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">⚛️</span>
             <h3><a href="https://github.com/EmreSakarya/pwr-rod-bundle-cfd" target="_blank">CFD Simulation of a 3×3 PWR Rod Bundle</a></h3>
@@ -149,8 +135,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">💧</span>
             <h3><a href="https://github.com/EmreSakarya/pwr-subchannel-flow-cfd" target="_blank">Flow Analysis in a PWR Fuel Rod Subchannel</a></h3>
@@ -164,8 +149,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">🔥</span>
             <h3><a href="https://github.com/EmreSakarya/triso-heat-conduction-cfd" target="_blank">Steady-State Heat Conduction in a TRISO Particle</a></h3>
@@ -192,8 +176,7 @@
 
       <div class="project-cards">
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">🌡️</span>
             <h3><a href="https://github.com/EmreSakarya/2d-transient-thermal-analysis" target="_blank">2D Transient Thermal Analysis of a Rectangular Plate</a></h3>
@@ -207,8 +190,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">📈</span>
             <h3><a href="https://github.com/EmreSakarya/point-reactor-kinetics-analysis" target="_blank">Point Reactor Kinetics Analysis</a></h3>
@@ -221,8 +203,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">🌊</span>
             <h3><a href="https://github.com/EmreSakarya/vertical-pipe-flow-analysis" target="_blank">Thermal-Hydraulic Analysis (HEM)</a></h3>
@@ -236,8 +217,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">☢️</span>
             <h3><a href="https://github.com/EmreSakarya/uranium-decay-chain-analysis" target="_blank">U-238 Decay Chain Modeling</a></h3>
@@ -262,8 +242,7 @@
 
       <div class="project-cards">
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">🎲</span>
             <h3><a href="https://github.com/EmreSakarya/neutron-transport-monte-carlo" target="_blank">Stochastic Neutron Transport Simulation</a></h3>
@@ -276,8 +255,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">⚡</span>
             <h3><a href="https://github.com/EmreSakarya/bethe-bloch-analysis" target="_blank">Charged Particle Energy Loss Simulation</a></h3>
@@ -301,8 +279,7 @@
 
       <div class="project-cards">
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">🏭</span>
             <h3><a href="https://github.com/EmreSakarya/combined-cycle-analysis" target="_blank">Combined Cycle Power Plant Optimization</a></h3>
@@ -315,8 +292,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">🛰️</span>
             <h3><a href="https://github.com/EmreSakarya/iPWR-Reactor-Simulation-Analysis" target="_blank">iPWR Startup Transient Analysis</a></h3>
@@ -329,8 +305,7 @@
           </div>
         </div>
 
-        <div class="project-card" data-tilt>
-          <div class="card-shine"></div>
+        <div class="project-card">
           <div class="project-header">
             <span class="project-icon">♻️</span>
             <h3><a href="https://github.com/EmreSakarya/regenerative-rankine-cycle" target="_blank">Regenerative Rankine Cycle Analysis</a></h3>
@@ -375,6 +350,6 @@
   <p>© 2025 Emre Sakarya · Nuclear Engineering, Hacettepe University</p>
 </footer>
 
-<script src="script.js?v=6"></script>
+<script src="script.js"></script>
 </body>
 </html>
