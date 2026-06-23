@@ -1,3 +1,174 @@
+// ===== 3D ATOM =====
+(function () {
+  const canvas = document.getElementById('atom-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const CW = canvas.width, CH = canvas.height;
+  const cx = CW / 2, cy = CH / 2;
+
+  const ACCENT = '224, 57, 43';
+  const ACCENT_SOFT = '255, 90, 77';
+  const CHEREN = '54, 194, 255';
+  const CHEREN_SOFT = '122, 216, 255';
+
+  // --- Nucleus: cluster of nucleons (protons + neutrons) ---
+  const nucleons = [];
+  const NUCLEON_COUNT = 16;
+  for (let i = 0; i < NUCLEON_COUNT; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const rr = Math.pow(Math.random(), 0.5) * 17;
+    nucleons.push({
+      ang: a, rad: rr,
+      baseX: Math.cos(a) * rr, baseY: Math.sin(a) * rr,
+      proton: i % 2 === 0,
+      jit: Math.random() * Math.PI * 2,
+      jitSpeed: 0.04 + Math.random() * 0.04,
+      size: 5.5 + Math.random() * 1.5
+    });
+  }
+
+  // --- Electron orbits (3D ellipses) ---
+  // Each orbit defined by radius, tilt (rotation about X axis), and yaw (rotation about Y/Z)
+  const orbits = [
+    { rx: 200, ry: 200, tilt: 1.15, yaw: 0.0,  speed: 0.022, phase: 0,           col: CHEREN },
+    { rx: 200, ry: 200, tilt: 1.15, yaw: 2.09, speed: 0.026, phase: 2.0,         col: CHEREN },
+    { rx: 200, ry: 200, tilt: 1.15, yaw: 4.18, speed: 0.019, phase: 4.0,         col: ACCENT_SOFT },
+    { rx: 150, ry: 150, tilt: 0.4,  yaw: 1.0,  speed: 0.030, phase: 1.0,         col: CHEREN },
+  ];
+
+  let globalRot = 0;
+
+  // project a 3D point (already rotated) — simple perspective
+  function project(x, y, z) {
+    const persp = 380 / (380 + z);
+    return { x: cx + x * persp, y: cy + y * persp, scale: persp, z };
+  }
+
+  // rotate point around X then Y axis
+  function rotate3d(x, y, z, ax, ay) {
+    // around X
+    let y1 = y * Math.cos(ax) - z * Math.sin(ax);
+    let z1 = y * Math.sin(ax) + z * Math.cos(ax);
+    // around Y
+    let x2 = x * Math.cos(ay) + z1 * Math.sin(ay);
+    let z2 = -x * Math.sin(ay) + z1 * Math.cos(ay);
+    return { x: x2, y: y1, z: z2 };
+  }
+
+  function orbitPoint(o, theta) {
+    // ellipse in its own plane
+    const ex = Math.cos(theta) * o.rx;
+    const ey = Math.sin(theta) * o.ry;
+    const ez = 0;
+    // apply orbit tilt (about X) and yaw (about Y), plus slow global yaw
+    return rotate3d(ex, ey, ez, o.tilt, o.yaw + globalRot);
+  }
+
+  function drawOrbitPath(o) {
+    const steps = 80;
+    // draw in two halves for depth (behind nucleus dimmer)
+    for (let pass = 0; pass < 2; pass++) {
+      ctx.beginPath();
+      let started = false;
+      for (let i = 0; i <= steps; i++) {
+        const th = (i / steps) * Math.PI * 2;
+        const p = orbitPoint(o, th);
+        const front = p.z >= 0;
+        if ((pass === 0 && front) || (pass === 1 && !front)) {
+          const pr = project(p.x, p.y, p.z);
+          if (!started) { ctx.moveTo(pr.x, pr.y); started = true; }
+          else ctx.lineTo(pr.x, pr.y);
+        } else {
+          started = false;
+        }
+      }
+      ctx.strokeStyle = `rgba(${o.col}, ${pass === 0 ? 0.32 : 0.1})`;
+      ctx.lineWidth = pass === 0 ? 1.4 : 1;
+      ctx.stroke();
+    }
+  }
+
+  function drawElectron(o, t) {
+    const theta = o.phase + t * o.speed * 60;
+    const p = orbitPoint(o, theta);
+    const pr = project(p.x, p.y, p.z);
+    const depth = (p.z + 200) / 400;              // 0 (back) .. 1 (front)
+    const size = 4 + depth * 5;
+    const alpha = 0.45 + depth * 0.55;
+
+    // trail
+    for (let k = 1; k <= 6; k++) {
+      const tp = orbitPoint(o, theta - k * 0.10);
+      const tpr = project(tp.x, tp.y, tp.z);
+      ctx.beginPath();
+      ctx.arc(tpr.x, tpr.y, size * (1 - k / 7), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${o.col}, ${alpha * (1 - k / 7) * 0.4})`;
+      ctx.fill();
+    }
+    // glow head
+    ctx.beginPath();
+    ctx.arc(pr.x, pr.y, size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${o.col}, ${alpha})`;
+    ctx.shadowBlur = 16 * depth + 6; ctx.shadowColor = `rgba(${o.col}, ${alpha})`;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    // white hot center
+    ctx.beginPath();
+    ctx.arc(pr.x, pr.y, size * 0.4, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${alpha * 0.9})`;
+    ctx.fill();
+    return p.z;
+  }
+
+  function drawNucleus(t) {
+    // pulsing scale
+    const pulse = 1 + Math.sin(t * 2) * 0.06;
+    for (const n of nucleons) {
+      n.jit += n.jitSpeed;
+      const jx = Math.cos(n.jit) * 1.6;
+      const jy = Math.sin(n.jit * 1.3) * 1.6;
+      const x = cx + (n.baseX + jx) * pulse;
+      const y = cy + (n.baseY + jy) * pulse;
+      const col = n.proton ? ACCENT : ACCENT_SOFT;
+      ctx.beginPath();
+      ctx.arc(x, y, n.size, 0, Math.PI * 2);
+      const g = ctx.createRadialGradient(x - n.size * 0.3, y - n.size * 0.3, 0, x, y, n.size);
+      g.addColorStop(0, `rgba(255,200,190,0.95)`);
+      g.addColorStop(0.5, `rgba(${col}, 0.95)`);
+      g.addColorStop(1, `rgba(${col}, 0.5)`);
+      ctx.fillStyle = g;
+      ctx.shadowBlur = 8; ctx.shadowColor = `rgba(${ACCENT}, 0.6)`;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  let start = performance.now();
+  function draw(now) {
+    const t = (now - start) / 1000;
+    globalRot += 0.0016;
+    ctx.clearRect(0, 0, CW, CH);
+
+    // 1. back halves of orbit paths + back electrons, 2. nucleus, 3. front
+    // Draw orbit paths (handles depth internally)
+    for (const o of orbits) drawOrbitPath(o);
+
+    // Collect electron z to layer around nucleus
+    const back = [], front = [];
+    for (const o of orbits) {
+      const theta = o.phase + t * o.speed * 60;
+      const p = orbitPoint(o, theta);
+      (p.z < 0 ? back : front).push(o);
+    }
+    back.forEach(o => drawElectron(o, t));
+    drawNucleus(t);
+    front.forEach(o => drawElectron(o, t));
+
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
 // ===== FISSION CHAIN REACTION BACKGROUND =====
 (function () {
   const canvas = document.getElementById('reactor-canvas');

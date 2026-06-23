@@ -111,48 +111,19 @@ body::before {
 .btn-outline { border-color: var(--border); color: var(--text); background: rgba(255,255,255,0.02); }
 .btn-outline:hover { border-color: var(--accent); color: var(--accent-soft); transform: translateY(-3px); }
 
-/* ===== REACTOR CORE ===== */
+/* ===== 3D ATOM ===== */
 .reactor {
-  position: absolute; right: 4%; top: 50%; transform: translateY(-50%);
-  width: 420px; height: 420px; z-index: 1;
+  position: absolute; right: 3%; top: 50%; transform: translateY(-50%);
+  width: 460px; height: 460px; z-index: 1;
 }
 .core-glow {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 200px; height: 200px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(224,57,43,0.55) 0%, rgba(255,90,77,0.25) 35%, transparent 70%);
-  filter: blur(20px); animation: coreGlow 3s ease-in-out infinite;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(224,57,43,0.4) 0%, rgba(255,90,77,0.18) 40%, transparent 72%);
+  filter: blur(22px); animation: coreGlow 3.2s ease-in-out infinite; z-index: 0;
 }
-@keyframes coreGlow { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: .8; } 50% { transform: translate(-50%,-50%) scale(1.25); opacity: 1; } }
-.core {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 30px; height: 30px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fff, var(--accent-soft) 45%, var(--accent) 100%);
-  box-shadow: 0 0 30px 8px rgba(224,57,43,0.8), 0 0 60px 18px rgba(255,90,77,0.4);
-  animation: corePulse 2.5s ease-in-out infinite;
-}
-@keyframes corePulse { 0%,100% { box-shadow: 0 0 30px 8px rgba(224,57,43,0.8), 0 0 60px 18px rgba(255,90,77,0.4); } 50% { box-shadow: 0 0 42px 14px rgba(224,57,43,1), 0 0 80px 26px rgba(255,90,77,0.6); } }
-.reactor-ring {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 380px; height: 380px; border-radius: 50%;
-  border: 1px dashed rgba(54,194,255,0.2);
-  animation: ringSpin 40s linear infinite;
-}
-@keyframes ringSpin { to { transform: translate(-50%,-50%) rotate(360deg); } }
-.orbit {
-  position: absolute; top: 50%; left: 50%; border: 1.5px solid rgba(224,57,43,0.3);
-  border-radius: 50%;
-}
-.orbit-1 { width: 300px; height: 140px; transform: translate(-50%,-50%) rotate(0deg); animation: spin 6s linear infinite; }
-.orbit-2 { width: 300px; height: 140px; transform: translate(-50%,-50%) rotate(60deg); animation: spin2 9s linear infinite; }
-.orbit-3 { width: 300px; height: 140px; transform: translate(-50%,-50%) rotate(120deg); animation: spin3 7.5s linear infinite; }
-@keyframes spin { from { transform: translate(-50%,-50%) rotate(0); } to { transform: translate(-50%,-50%) rotate(360deg); } }
-@keyframes spin2 { from { transform: translate(-50%,-50%) rotate(60deg); } to { transform: translate(-50%,-50%) rotate(420deg); } }
-@keyframes spin3 { from { transform: translate(-50%,-50%) rotate(120deg); } to { transform: translate(-50%,-50%) rotate(480deg); } }
-.electron {
-  position: absolute; top: 50%; left: 0; width: 12px; height: 12px;
-  background: var(--cherenkov); border-radius: 50%;
-  box-shadow: 0 0 14px 4px rgba(54,194,255,0.8); margin-top: -6px; margin-left: -6px;
-}
+@keyframes coreGlow { 0%,100% { transform: translate(-50%,-50%) scale(1); opacity: .75; } 50% { transform: translate(-50%,-50%) scale(1.22); opacity: 1; } }
+#atom-canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; }
 
 /* ===== SCROLL DOWN ===== */
 .scroll-down { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 26px; height: 42px; border: 2px solid var(--text-dim); border-radius: 14px; z-index: 3; }
