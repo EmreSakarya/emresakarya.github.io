@@ -1,6 +1,4 @@
-// ===== NUCLEAR FISSION REACTION =====
-// A full U-235 fission cycle: neutron capture → U-236* excitation → deformation
-// → scission into two fragments → release of prompt neutrons + gamma + energy → reset.
+// ===== 3D ATOM with periodic fission events =====
 (function () {
   const canvas = document.getElementById('atom-canvas');
   if (!canvas) return;
@@ -9,226 +7,243 @@
   const cx = CW / 2, cy = CH / 2;
   const TAU = Math.PI * 2;
 
-  const ACCENT   = '224, 57, 43';    // protons
-  const NEUT_NUC = '120, 150, 180';  // bound neutrons (grey-blue)
-  const CHEREN   = '54, 194, 255';   // free neutrons (Cherenkov blue)
-  const GAMMA    = '210, 235, 255';  // gamma flash
+  const ACCENT      = '224, 57, 43';
+  const ACCENT_SOFT = '255, 90, 77';
+  const CHEREN      = '54, 194, 255';
+  const GAMMA       = '210, 235, 255';
 
-  const PHASE = { APPROACH: 0, EXCITE: 1, DEFORM: 2, SPLIT: 3, COOL: 4 };
-  const DUR   = { 0: 1.1, 1: 1.3, 2: 0.95, 3: 1.9, 4: 0.9 };
-  const LABEL = {
-    0: 'incoming neutron',
-    1: 'U-236*  ·  excited & vibrating',
-    2: 'deformation  ·  necking',
-    3: 'scission  ·  ≈ 200 MeV released',
-    4: '—'
-  };
-
-  let phase, phaseT, splitAxis, incoming, nucleons, freeNeutrons, gammas, sepDist, energy, born;
-
-  function buildNucleus(count) {
-    const arr = [];
-    for (let i = 0; i < count; i++) {
-      const a = Math.random() * TAU;
-      const r = Math.pow(Math.random(), 0.5) * 27;
-      arr.push({
-        ox: Math.cos(a) * r, oy: Math.sin(a) * r * 0.92,
-        proton: i % 2 === 0,
-        size: 4.8 + Math.random() * 1.6,
-        jit: Math.random() * TAU,
-        jitSp: 0.04 + Math.random() * 0.06
-      });
-    }
-    return arr;
+  // ---- Nucleus nucleons ----
+  const nucleons = [];
+  for (let i = 0; i < 18; i++) {
+    const a = Math.random() * TAU;
+    const r = Math.pow(Math.random(), 0.5) * 19;
+    nucleons.push({
+      bx: Math.cos(a) * r, by: Math.sin(a) * r,
+      proton: i % 2 === 0,
+      jit: Math.random() * TAU,
+      jitSp: 0.035 + Math.random() * 0.04,
+      size: 5.2 + Math.random() * 1.6
+    });
   }
 
-  function reset() {
-    phase = PHASE.APPROACH; phaseT = 0;
-    splitAxis = Math.random() * TAU;
+  // ---- Electron orbits ----
+  const orbits = [
+    { rx: 195, ry: 195, tilt: 1.15, yaw: 0.0,  speed: 0.022, phase: 0,   col: CHEREN },
+    { rx: 195, ry: 195, tilt: 1.15, yaw: 2.09, speed: 0.026, phase: 2.0, col: CHEREN },
+    { rx: 195, ry: 195, tilt: 1.15, yaw: 4.18, speed: 0.019, phase: 4.0, col: CHEREN },
+    { rx: 148, ry: 148, tilt: 0.40, yaw: 1.0,  speed: 0.030, phase: 1.0, col: CHEREN },
+  ];
+  let globalRot = 0;
+
+  function project(x, y, z) {
+    const s = 380 / (380 + z);
+    return { x: cx + x * s, y: cy + y * s, s, z };
+  }
+  function rotate3d(x, y, z, ax, ay) {
+    const y1 = y * Math.cos(ax) - z * Math.sin(ax);
+    const z1 = y * Math.sin(ax) + z * Math.cos(ax);
+    const x2 = x * Math.cos(ay) + z1 * Math.sin(ay);
+    const z2 = -x * Math.sin(ay) + z1 * Math.cos(ay);
+    return { x: x2, y: y1, z: z2 };
+  }
+  function orbitPt(o, theta) {
+    return rotate3d(Math.cos(theta) * o.rx, Math.sin(theta) * o.ry, 0, o.tilt, o.yaw + globalRot);
+  }
+
+  // ---- Fission state ----
+  let fissionT = 0;           // countdown to next fission event (seconds)
+  let event    = null;        // active fission event object
+
+  function scheduleFission() {
+    fissionT = 2.8 + Math.random() * 2.0;
+  }
+  scheduleFission();
+
+  function triggerFission() {
     const ang = Math.random() * TAU;
-    incoming = { sx: cx + Math.cos(ang) * 250, sy: cy + Math.sin(ang) * 250,
-                 x: 0, y: 0, dir: ang + Math.PI };
-    nucleons = buildNucleus(18);
-    const ax = Math.cos(splitAxis), ay = Math.sin(splitAxis);
-    nucleons.forEach(n => { n.lobe = (n.ox * ax + n.oy * ay) >= 0 ? 1 : -1; });
-    freeNeutrons = []; gammas = []; sepDist = 0; energy = null; born = 0;
+    const gammas = [];
+    const freeN  = [];
+    event = {
+      t: 0,
+      inDir: ang,
+      inX: cx + Math.cos(ang) * 240, inY: cy + Math.sin(ang) * 240,
+      // approach 0-0.5s, impact flash 0.5-0.7s, neutrons scatter 0.7-2.2s
+      gammas, freeN,
+      flashed: false
+    };
   }
 
-  function nextPhase() {
-    if (phase === PHASE.APPROACH) {
-      // neutron captured → nucleus becomes U-236*
-      nucleons.push({ ox: 0, oy: 0, proton: false, size: 5.4,
-                      jit: 0, jitSp: 0.08, lobe: Math.random() < 0.5 ? 1 : -1 });
-      gammas.push({ x: cx, y: cy, r: 0, max: 60, a: 0.7, w: 2 });
-      phase = PHASE.EXCITE; phaseT = 0;
-    } else if (phase === PHASE.EXCITE) {
-      phase = PHASE.DEFORM; phaseT = 0;
-    } else if (phase === PHASE.DEFORM) {
-      // SCISSION — release neutrons, gamma burst, energy
-      const ax = Math.cos(splitAxis), ay = Math.sin(splitAxis);
-      const emit = 2 + Math.floor(Math.random() * 2); // 2-3 prompt neutrons
-      for (let i = 0; i < emit; i++) {
-        const spread = (Math.random() - 0.5) * 2.4;
-        const a = splitAxis + (i % 2 ? Math.PI : 0) + spread;
-        const sp = 95 + Math.random() * 60;
-        freeNeutrons.push({ x: cx + ax * sepDist * (i % 2 ? -1 : 1),
-                            y: cy + ay * sepDist * (i % 2 ? -1 : 1),
-                            vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0, max: 1.6 });
+  function updateFission(dt) {
+    if (!event) return;
+    event.t += dt;
+    const { t } = event;
+
+    // at impact moment: emit gamma rings + 2-3 free neutrons
+    if (t > 0.5 && !event.flashed) {
+      event.flashed = true;
+      event.gammas.push({ r: 0, max: 210, a: 0.85, w: 2.5 });
+      event.gammas.push({ r: 0, max: 130, a: 0.55, w: 1.5 });
+      const cnt = 2 + Math.floor(Math.random() * 2);
+      for (let i = 0; i < cnt; i++) {
+        const a = Math.random() * TAU;
+        const sp = 110 + Math.random() * 70;
+        event.freeN.push({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0, max: 1.5 });
       }
-      gammas.push({ x: cx, y: cy, r: 0, max: 230, a: 0.9, w: 3 });
-      gammas.push({ x: cx, y: cy, r: 0, max: 150, a: 0.6, w: 2 });
-      energy = { t: 0 };
-      phase = PHASE.SPLIT; phaseT = 0;
-    } else if (phase === PHASE.SPLIT) {
-      phase = PHASE.COOL; phaseT = 0;
-    } else {
-      reset();
-    }
-  }
-
-  function drawNucleon(x, y, n, alpha, glow) {
-    const col = n.proton ? ACCENT : NEUT_NUC;
-    ctx.beginPath();
-    ctx.arc(x, y, n.size, 0, TAU);
-    const g = ctx.createRadialGradient(x - n.size * 0.3, y - n.size * 0.3, 0, x, y, n.size);
-    g.addColorStop(0, `rgba(255,228,218,${0.95 * alpha})`);
-    g.addColorStop(0.5, `rgba(${col},${0.95 * alpha})`);
-    g.addColorStop(1, `rgba(${col},${0.45 * alpha})`);
-    ctx.fillStyle = g;
-    ctx.shadowBlur = glow; ctx.shadowColor = `rgba(${n.proton ? ACCENT : CHEREN},${0.6 * alpha})`;
-    ctx.fill(); ctx.shadowBlur = 0;
-  }
-
-  function drawNucleus(alpha, wobble, glow) {
-    const ax = Math.cos(splitAxis), ay = Math.sin(splitAxis);
-    // neck connector (bright bridge that thins as the two lobes pull apart)
-    if (sepDist > 1 && sepDist < 46) {
-      const f = 1 - sepDist / 46;
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(splitAxis);
-      ctx.beginPath();
-      ctx.ellipse(0, 0, sepDist + 14, 13 * f + 4, 0, 0, TAU);
-      ctx.fillStyle = `rgba(255,180,120,${0.35 * f * alpha})`;
-      ctx.shadowBlur = 22; ctx.shadowColor = `rgba(255,170,90,${0.5 * f})`;
-      ctx.fill(); ctx.shadowBlur = 0;
-      ctx.restore();
-    }
-    for (const n of nucleons) {
-      n.jit += n.jitSp;
-      const jx = Math.cos(n.jit) * wobble;
-      const jy = Math.sin(n.jit * 1.3) * wobble;
-      const x = cx + n.ox + n.lobe * ax * sepDist + jx;
-      const y = cy + n.oy + n.lobe * ay * sepDist + jy;
-      drawNucleon(x, y, n, alpha, glow);
-    }
-  }
-
-  function drawFreeNeutron(p) {
-    const fade = 1 - p.life / p.max;
-    // trail
-    ctx.beginPath();
-    ctx.moveTo(p.x, p.y);
-    ctx.lineTo(p.x - p.vx * 0.06, p.y - p.vy * 0.06);
-    ctx.strokeStyle = `rgba(${CHEREN},${0.5 * fade})`;
-    ctx.lineWidth = 2; ctx.stroke();
-    // head
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 4, 0, TAU);
-    ctx.fillStyle = `rgba(${CHEREN},${fade})`;
-    ctx.shadowBlur = 12; ctx.shadowColor = `rgba(${CHEREN},${fade})`;
-    ctx.fill(); ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 1.6, 0, TAU);
-    ctx.fillStyle = `rgba(255,255,255,${fade})`;
-    ctx.fill();
-  }
-
-  function drawLabel() {
-    const txt = LABEL[phase];
-    if (!txt || txt === '—') return;
-    ctx.font = '600 14px "Fira Code", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = `rgba(${CHEREN}, 0.85)`;
-    ctx.fillText(txt, cx, CH - 22);
-  }
-
-  reset();
-  let last = performance.now();
-  function draw(now) {
-    const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    phaseT += dt; born = Math.min(1, born + dt * 2.2);
-    ctx.clearRect(0, 0, CW, CH);
-
-    let alpha = 1, wobble = 1.2, glow = 8;
-
-    if (phase === PHASE.APPROACH) {
-      const p = Math.min(1, phaseT / DUR[0]);
-      const e = p * p; // ease-in toward the nucleus
-      incoming.x = incoming.sx + (cx - incoming.sx) * e;
-      incoming.y = incoming.sy + (cy - incoming.sy) * e;
-      alpha = born;
-    } else if (phase === PHASE.EXCITE) {
-      const p = phaseT / DUR[1];
-      wobble = 1.2 + p * 4.5 + Math.sin(phaseT * 22) * 1.6;
-      glow = 10 + Math.sin(phaseT * 14) * 8 + p * 10;
-    } else if (phase === PHASE.DEFORM) {
-      const p = Math.min(1, phaseT / DUR[2]);
-      sepDist = p * p * 36;
-      wobble = 3.5; glow = 16;
-    } else if (phase === PHASE.SPLIT) {
-      sepDist += 78 * dt;        // fragments fly apart
-      const p = phaseT / DUR[3];
-      alpha = Math.max(0, 1 - p * 0.85);
-      wobble = 2.2; glow = 10;
-    } else if (phase === PHASE.COOL) {
-      alpha = Math.max(0, 0.15 - phaseT * 0.3);
     }
 
     // gamma rings
-    for (let i = gammas.length - 1; i >= 0; i--) {
-      const g = gammas[i];
-      g.r += (g.max) * dt * 1.6; g.a -= dt * 1.3;
+    for (let i = event.gammas.length - 1; i >= 0; i--) {
+      const g = event.gammas[i];
+      g.r += g.max * dt * 1.5; g.a -= dt * 1.1;
       ctx.beginPath();
-      ctx.arc(g.x, g.y, g.r, 0, TAU);
-      ctx.strokeStyle = `rgba(${GAMMA}, ${Math.max(0, g.a)})`;
+      ctx.arc(cx, cy, g.r, 0, TAU);
+      ctx.strokeStyle = `rgba(${GAMMA},${Math.max(0, g.a)})`;
       ctx.lineWidth = g.w; ctx.stroke();
-      if (g.a <= 0 || g.r > g.max) gammas.splice(i, 1);
+      if (g.a <= 0) event.gammas.splice(i, 1);
     }
 
-    // nucleus / fragments
-    if (phase !== PHASE.COOL || alpha > 0) drawNucleus(alpha, wobble, glow);
-
-    // incoming neutron
-    if (phase === PHASE.APPROACH) drawFreeNeutron({
-      x: incoming.x, y: incoming.y,
-      vx: Math.cos(incoming.dir) * 90, vy: Math.sin(incoming.dir) * 90, life: 0, max: 1
-    });
-
-    // emitted neutrons
-    for (let i = freeNeutrons.length - 1; i >= 0; i--) {
-      const p = freeNeutrons[i];
+    // free neutrons
+    for (let i = event.freeN.length - 1; i >= 0; i--) {
+      const p = event.freeN[i];
       p.x += p.vx * dt; p.y += p.vy * dt; p.life += dt;
-      drawFreeNeutron(p);
-      if (p.life > p.max) freeNeutrons.splice(i, 1);
+      const fade = 1 - p.life / p.max;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x - p.vx * 0.055, p.y - p.vy * 0.055);
+      ctx.strokeStyle = `rgba(${CHEREN},${0.5 * fade})`;
+      ctx.lineWidth = 1.8; ctx.stroke();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3.8, 0, TAU);
+      ctx.fillStyle = `rgba(${CHEREN},${fade})`;
+      ctx.shadowBlur = 10; ctx.shadowColor = `rgba(${CHEREN},${fade})`;
+      ctx.fill(); ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, TAU);
+      ctx.fillStyle = `rgba(255,255,255,${fade})`; ctx.fill();
+      if (p.life > p.max) event.freeN.splice(i, 1);
     }
 
-    // energy callout
-    if (energy) {
-      energy.t += dt;
-      const a = Math.max(0, 1 - energy.t / 1.6);
-      ctx.font = '700 26px "Space Grotesk", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = `rgba(255,210,120,${a})`;
-      ctx.shadowBlur = 18; ctx.shadowColor = `rgba(255,170,60,${a})`;
-      ctx.fillText('≈ 200 MeV', cx, cy - 70 - energy.t * 26);
-      ctx.shadowBlur = 0;
-      if (energy.t > 1.6) energy = null;
+    // incoming neutron approach
+    if (t < 0.5) {
+      const p = (t / 0.5);
+      const e = p * p;
+      const nx = event.inX + (cx - event.inX) * e;
+      const ny = event.inY + (cy - event.inY) * e;
+      const fade = 1 - p;
+      ctx.beginPath(); ctx.moveTo(nx, ny);
+      ctx.lineTo(nx - Math.cos(event.inDir + Math.PI) * 14, ny - Math.sin(event.inDir + Math.PI) * 14);
+      ctx.strokeStyle = `rgba(${CHEREN},${0.55 * (1 - p * 0.5)})`; ctx.lineWidth = 1.8; ctx.stroke();
+      ctx.beginPath(); ctx.arc(nx, ny, 4, 0, TAU);
+      ctx.fillStyle = `rgba(${CHEREN},0.9)`;
+      ctx.shadowBlur = 12; ctx.shadowColor = `rgba(${CHEREN},0.8)`;
+      ctx.fill(); ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(nx, ny, 1.6, 0, TAU);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill();
     }
 
-    drawLabel();
+    // nucleus wobble strength during excitation
+    if (t > 2.2) { event = null; scheduleFission(); }
+  }
 
-    if (phaseT >= DUR[phase]) nextPhase();
+  // excitation wobble for nucleus (0 = calm, 1 = max shaking)
+  function wobbleFactor() {
+    if (!event) return 0;
+    const { t } = event;
+    if (t < 0.5) return 0;
+    if (t < 0.9) return (t - 0.5) / 0.4;
+    if (t < 1.6) return 1.0;
+    return Math.max(0, 1 - (t - 1.6) / 0.6);
+  }
+
+  // ---- Draw orbit path ----
+  function drawOrbitPath(o) {
+    for (let pass = 0; pass < 2; pass++) {
+      ctx.beginPath(); let started = false;
+      for (let i = 0; i <= 80; i++) {
+        const p = orbitPt(o, (i / 80) * TAU);
+        const front = p.z >= 0;
+        if ((pass === 0 && front) || (pass === 1 && !front)) {
+          const pr = project(p.x, p.y, p.z);
+          if (!started) { ctx.moveTo(pr.x, pr.y); started = true; }
+          else ctx.lineTo(pr.x, pr.y);
+        } else started = false;
+      }
+      ctx.strokeStyle = `rgba(${o.col},${pass === 0 ? 0.30 : 0.09})`;
+      ctx.lineWidth = pass === 0 ? 1.3 : 0.9; ctx.stroke();
+    }
+  }
+
+  // ---- Draw electron ----
+  function drawElectron(o, t) {
+    const theta = o.phase + t * o.speed * 60;
+    const p = orbitPt(o, theta);
+    const pr = project(p.x, p.y, p.z);
+    const depth = (p.z + 200) / 400;
+    const size = 3.8 + depth * 5;
+    const alpha = 0.44 + depth * 0.56;
+    for (let k = 1; k <= 6; k++) {
+      const tp = orbitPt(o, theta - k * 0.10);
+      const tpr = project(tp.x, tp.y, tp.z);
+      ctx.beginPath(); ctx.arc(tpr.x, tpr.y, size * (1 - k / 7), 0, TAU);
+      ctx.fillStyle = `rgba(${o.col},${alpha * (1 - k / 7) * 0.38})`; ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(pr.x, pr.y, size, 0, TAU);
+    ctx.fillStyle = `rgba(${o.col},${alpha})`;
+    ctx.shadowBlur = 14 * depth + 5; ctx.shadowColor = `rgba(${o.col},${alpha})`;
+    ctx.fill(); ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(pr.x, pr.y, size * 0.38, 0, TAU);
+    ctx.fillStyle = `rgba(255,255,255,${alpha * 0.88})`; ctx.fill();
+    return p.z;
+  }
+
+  // ---- Draw nucleus ----
+  function drawNucleus(wobble) {
+    const w = wobble * 4.5;
+    for (const n of nucleons) {
+      n.jit += n.jitSp;
+      const jx = Math.cos(n.jit) * (1.5 + w);
+      const jy = Math.sin(n.jit * 1.3) * (1.5 + w);
+      const x = cx + n.bx + jx, y = cy + n.by + jy;
+      const col = n.proton ? ACCENT : ACCENT_SOFT;
+      ctx.beginPath(); ctx.arc(x, y, n.size, 0, TAU);
+      const g = ctx.createRadialGradient(x - n.size * 0.3, y - n.size * 0.3, 0, x, y, n.size);
+      const hot = wobble > 0.3 ? `rgba(255,240,200,0.95)` : `rgba(255,200,190,0.95)`;
+      g.addColorStop(0, hot);
+      g.addColorStop(0.5, `rgba(${col},0.95)`);
+      g.addColorStop(1, `rgba(${col},0.45)`);
+      ctx.fillStyle = g;
+      const glow = 7 + wobble * 18;
+      ctx.shadowBlur = glow; ctx.shadowColor = `rgba(${ACCENT},${0.5 + wobble * 0.4})`;
+      ctx.fill(); ctx.shadowBlur = 0;
+    }
+  }
+
+  let start = performance.now(), last = start;
+  function draw(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    const t  = (now - start) / 1000;
+    last = now;
+    globalRot += 0.0015;
+    fissionT -= dt;
+    if (fissionT <= 0 && !event) triggerFission();
+
+    ctx.clearRect(0, 0, CW, CH);
+
+    // orbit paths
+    for (const o of orbits) drawOrbitPath(o);
+
+    // layer electrons behind/front nucleus
+    const back = [], front = [];
+    for (const o of orbits) {
+      const p = orbitPt(o, o.phase + t * o.speed * 60);
+      (p.z < 0 ? back : front).push(o);
+    }
+    back.forEach(o => drawElectron(o, t));
+
+    // fission gammas drawn under nucleus, neutrons on top
+    updateFission(dt);
+
+    drawNucleus(wobbleFactor());
+    front.forEach(o => drawElectron(o, t));
+
     requestAnimationFrame(draw);
   }
   requestAnimationFrame(draw);
