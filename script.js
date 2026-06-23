@@ -32,7 +32,7 @@
   const orbits = [
     { rx: 200, ry: 200, tilt: 1.15, yaw: 0.0,  speed: 0.022, phase: 0,           col: CHEREN },
     { rx: 200, ry: 200, tilt: 1.15, yaw: 2.09, speed: 0.026, phase: 2.0,         col: CHEREN },
-    { rx: 200, ry: 200, tilt: 1.15, yaw: 4.18, speed: 0.019, phase: 4.0,         col: ACCENT_SOFT },
+    { rx: 200, ry: 200, tilt: 1.15, yaw: 4.18, speed: 0.019, phase: 4.0,         col: CHEREN },
     { rx: 150, ry: 150, tilt: 0.4,  yaw: 1.0,  speed: 0.030, phase: 1.0,         col: CHEREN },
   ];
 
