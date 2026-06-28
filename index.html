@@ -112,6 +112,103 @@
   <div class="container">
     <h2 class="section-title">Projects</h2>
 
+    <!-- NUMERICAL GROUP -->
+    <div class="project-group">
+      <div class="group-label">
+        <span class="group-icon">🔬</span>
+        Numerical Methods &amp; Heat Transfer · Python / Fortran
+      </div>
+      <p class="group-desc">Solvers built from scratch for non-linear, stiff, and multi-physics heat-transfer problems.</p>
+
+      <div class="project-cards">
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-icon">⚛️</span>
+            <h3><a href="https://github.com/EmreSakarya/iaea-3d-pwr-benchmark" target="_blank">IAEA-3D PWR Benchmark · Neutron Diffusion Solver</a></h3>
+          </div>
+          <p>From-scratch two-group neutron diffusion solver for the 3-D IAEA PWR core benchmark (ANL-7416). Mesh-centered FDM with harmonic-mean interface coefficients, Robin vacuum BCs, power iteration + red-black SOR. Reproduces the reference <strong>k_eff = 1.02903</strong> to within <strong>−7.9 pcm</strong> and matches the 1977 VENTURE mesh-convergence sequence.</p>
+          <div class="tag-row">
+            <span class="tag">Fortran</span>
+            <span class="tag">OpenMP</span>
+            <span class="tag">Finite Difference</span>
+            <span class="tag">Eigenvalue</span>
+            <span class="tag">Red-Black SOR</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-icon">⚛️</span>
+            <h3><a href="https://github.com/EmreSakarya/c5g7-2d-transport-benchmark" target="_blank">C5G7 · 2-D 7-Group Neutron Transport Benchmark (S<sub>N</sub>)</a></h3>
+          </div>
+          <p>From-scratch discrete-ordinates (S<sub>N</sub>) neutron <strong>transport</strong> solver for the OECD/NEA <strong>C5G7 MOX</strong> benchmark — heterogeneous pin-by-pin UO₂ + MOX geometry with <strong>no spatial homogenisation</strong>. Product angular quadrature, diamond-difference sweep, volume-preserving "digital-disk" pins, OpenMP. Reproduces the MCNP reference <strong>k_eff = 1.18655</strong> to within <strong>−182 pcm</strong>; mesh refinement drives the error from −3616 down to −182 pcm.</p>
+          <div class="tag-row">
+            <span class="tag">Fortran</span>
+            <span class="tag">OpenMP</span>
+            <span class="tag">Discrete Ordinates (S_N)</span>
+            <span class="tag">7-Group Transport</span>
+            <span class="tag">Eigenvalue</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-icon">☢️</span>
+            <h3><a href="https://github.com/EmreSakarya/uranium-decay-chain-analysis" target="_blank">U-238 Decay Chain Modeling</a></h3>
+          </div>
+          <p>14-stage decay chain (U-238 → Pb-206) with half-lives spanning 10⁹ years to seconds — a severely <strong>stiff system</strong>. Generic Implicit Euler solver in Fortran, mirroring legacy HPC nuclear-code logic.</p>
+          <div class="tag-row">
+            <span class="tag">Fortran 90</span>
+            <span class="tag">Implicit Euler</span>
+            <span class="tag">Stiff ODEs</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-icon">🌡️</span>
+            <h3><a href="https://github.com/EmreSakarya/2d-transient-thermal-analysis" target="_blank">2D Transient Thermal Analysis of a Rectangular Plate</a></h3>
+          </div>
+          <p>Two-stage heat treatment on a 3×5 nodal grid using <strong>CVFDM</strong> with temperature-dependent properties updated every step. Heating under adiabatic boundaries → 1000 K; cooling via Ra-based natural convection in liquid-metal bath → 600 K (~1920 s).</p>
+          <div class="tag-row">
+            <span class="tag">Python</span>
+            <span class="tag">Control Volume FDM</span>
+            <span class="tag">Explicit Euler</span>
+            <span class="tag">Natural Convection</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-icon">📈</span>
+            <h3><a href="https://github.com/EmreSakarya/point-reactor-kinetics-analysis" target="_blank">Point Reactor Kinetics Analysis</a></h3>
+          </div>
+          <p>Point reactor kinetics with delayed neutrons under reactivity insertions. Implemented <strong>RK4</strong> and <strong>Heun's Predictor-Corrector</strong> integrators; stiffness-ratio analysis against analytical solutions.</p>
+          <div class="tag-row">
+            <span class="tag">Python</span>
+            <span class="tag">RK4</span>
+            <span class="tag">Stiff Systems</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-icon">🌊</span>
+            <h3><a href="https://github.com/EmreSakarya/vertical-pipe-flow-analysis" target="_blank">Thermal-Hydraulic Analysis (HEM)</a></h3>
+          </div>
+          <p>1D solver for downward water flow under constant heat flux using the <strong>Homogeneous Equilibrium Model</strong>. Predicts boiling inception and void-fraction profiles with IAPWS-97 steam tables.</p>
+          <div class="tag-row">
+            <span class="tag">Python</span>
+            <span class="tag">FVM</span>
+            <span class="tag">Two-Phase Flow</span>
+            <span class="tag">IAPWS-97</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- CFD GROUP -->
     <div class="project-group">
       <div class="group-label">
@@ -175,88 +272,6 @@
             <span class="tag">Spherical Conduction</span>
             <span class="tag">Mesh Independence</span>
             <span class="tag">UO₂</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- NUMERICAL GROUP -->
-    <div class="project-group">
-      <div class="group-label">
-        <span class="group-icon">🔬</span>
-        Numerical Methods &amp; Heat Transfer · Python / Fortran
-      </div>
-      <p class="group-desc">Solvers built from scratch for non-linear, stiff, and multi-physics heat-transfer problems.</p>
-
-      <div class="project-cards">
-
-        <div class="project-card">
-          <div class="project-header">
-            <span class="project-icon">⚛️</span>
-            <h3><a href="https://github.com/EmreSakarya/iaea-3d-pwr-benchmark" target="_blank">IAEA-3D PWR Benchmark · Neutron Diffusion Solver</a></h3>
-          </div>
-          <p>From-scratch two-group neutron diffusion solver for the 3-D IAEA PWR core benchmark (ANL-7416). Mesh-centered FDM with harmonic-mean interface coefficients, Robin vacuum BCs, power iteration + red-black SOR. Reproduces the reference <strong>k_eff = 1.02903</strong> to within <strong>−7.9 pcm</strong> and matches the 1977 VENTURE mesh-convergence sequence.</p>
-          <div class="tag-row">
-            <span class="tag">Fortran</span>
-            <span class="tag">OpenMP</span>
-            <span class="tag">Finite Difference</span>
-            <span class="tag">Eigenvalue</span>
-            <span class="tag">Red-Black SOR</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-header">
-            <span class="project-icon">☢️</span>
-            <h3><a href="https://github.com/EmreSakarya/uranium-decay-chain-analysis" target="_blank">U-238 Decay Chain Modeling</a></h3>
-          </div>
-          <p>14-stage decay chain (U-238 → Pb-206) with half-lives spanning 10⁹ years to seconds — a severely <strong>stiff system</strong>. Generic Implicit Euler solver in Fortran, mirroring legacy HPC nuclear-code logic.</p>
-          <div class="tag-row">
-            <span class="tag">Fortran 90</span>
-            <span class="tag">Implicit Euler</span>
-            <span class="tag">Stiff ODEs</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-header">
-            <span class="project-icon">🌡️</span>
-            <h3><a href="https://github.com/EmreSakarya/2d-transient-thermal-analysis" target="_blank">2D Transient Thermal Analysis of a Rectangular Plate</a></h3>
-          </div>
-          <p>Two-stage heat treatment on a 3×5 nodal grid using <strong>CVFDM</strong> with temperature-dependent properties updated every step. Heating under adiabatic boundaries → 1000 K; cooling via Ra-based natural convection in liquid-metal bath → 600 K (~1920 s).</p>
-          <div class="tag-row">
-            <span class="tag">Python</span>
-            <span class="tag">Control Volume FDM</span>
-            <span class="tag">Explicit Euler</span>
-            <span class="tag">Natural Convection</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-header">
-            <span class="project-icon">📈</span>
-            <h3><a href="https://github.com/EmreSakarya/point-reactor-kinetics-analysis" target="_blank">Point Reactor Kinetics Analysis</a></h3>
-          </div>
-          <p>Point reactor kinetics with delayed neutrons under reactivity insertions. Implemented <strong>RK4</strong> and <strong>Heun's Predictor-Corrector</strong> integrators; stiffness-ratio analysis against analytical solutions.</p>
-          <div class="tag-row">
-            <span class="tag">Python</span>
-            <span class="tag">RK4</span>
-            <span class="tag">Stiff Systems</span>
-          </div>
-        </div>
-
-        <div class="project-card">
-          <div class="project-header">
-            <span class="project-icon">🌊</span>
-            <h3><a href="https://github.com/EmreSakarya/vertical-pipe-flow-analysis" target="_blank">Thermal-Hydraulic Analysis (HEM)</a></h3>
-          </div>
-          <p>1D solver for downward water flow under constant heat flux using the <strong>Homogeneous Equilibrium Model</strong>. Predicts boiling inception and void-fraction profiles with IAPWS-97 steam tables.</p>
-          <div class="tag-row">
-            <span class="tag">Python</span>
-            <span class="tag">FVM</span>
-            <span class="tag">Two-Phase Flow</span>
-            <span class="tag">IAPWS-97</span>
           </div>
         </div>
 
