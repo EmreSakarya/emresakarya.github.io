@@ -125,6 +125,22 @@
         <div class="project-card">
           <div class="project-header">
             <span class="project-icon">⚛️</span>
+            <h3><a href="https://coreforge.streamlit.app" target="_blank">CoreForge · Interactive 2-D / 3-D Reactor Core Simulator</a></h3>
+          </div>
+          <p>Web-based multigroup neutron diffusion code for whole reactor cores: k<sub>eff</sub>, flux and power maps, peaking factors, control-rod and soluble-boron studies. Fortran engine (mesh-centred FDM, power iteration + red-black SOR, OpenMP) behind a bilingual Streamlit interface. Two-step scheme with <strong>DRAGON5</strong> lattice tables (172 groups, JEF-2.2) for 11 enrichments, 1.6–4.95 %. Validated on IAEA-2D (<strong>−7.8 pcm</strong>), IAEA-3D, BIBLIS, KOEBERG, LRA and TWIGL, and against the measured <strong>BEAVRS</strong> zero-power critical boron. <a href="https://coreforge.streamlit.app" target="_blank" style="color:var(--accent-soft);font-weight:600;white-space:nowrap">Live demo →</a></p>
+          <div class="tag-row">
+            <span class="tag">Fortran</span>
+            <span class="tag">OpenMP</span>
+            <span class="tag">Python · Streamlit</span>
+            <span class="tag">DRAGON5</span>
+            <span class="tag">Multigroup Diffusion</span>
+            <span class="tag">Benchmark Validation</span>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header">
+            <span class="project-icon">⚛️</span>
             <h3><a href="https://github.com/EmreSakarya/iaea-3d-pwr-benchmark" target="_blank">IAEA-3D PWR Benchmark · Neutron Diffusion Solver</a></h3>
           </div>
           <p>From-scratch two-group neutron diffusion solver for the 3-D IAEA PWR core benchmark (ANL-7416). Mesh-centered FDM with harmonic-mean interface coefficients, Robin vacuum BCs, power iteration + red-black SOR. Reproduces the reference <strong>k_eff = 1.02903</strong> to within <strong>−7.9 pcm</strong> and matches the 1977 VENTURE mesh-convergence sequence.</p>
