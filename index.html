@@ -17,6 +17,7 @@
   <div class="nav-inner">
     <span class="nav-logo">ES<span class="accent">.</span></span>
     <ul class="nav-links">
+      <li><a href="#coreforge" class="nav-flag">CoreForge</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#projects">Projects</a></li>
       <li><a href="#contact">Contact</a></li>
@@ -38,7 +39,8 @@
       from reactor kinetics to full-bundle CFD simulations.
     </p>
     <div class="hero-btns">
-      <a href="#projects" class="btn btn-primary">View Projects</a>
+      <a href="#coreforge" class="btn btn-primary btn-glow">⚛️ CoreForge — Flagship Project</a>
+      <a href="#projects" class="btn btn-outline">View Projects</a>
       <a href="https://github.com/EmreSakarya" target="_blank" class="btn btn-outline">GitHub</a>
     </div>
   </div>
@@ -53,6 +55,50 @@
 
   <div class="hero-bg-glow"></div>
   <a href="#about" class="scroll-down"><span></span></a>
+</section>
+
+<!-- FLAGSHIP: COREFORGE -->
+<section id="coreforge">
+  <div class="container">
+    <div class="flagship">
+      <div class="flagship-inner">
+        <div class="flagship-badge">★ Flagship project</div>
+        <h2 class="flagship-title">CoreForge</h2>
+        <p class="flagship-sub">Interactive 2-D / 3-D reactor core simulator — multigroup neutron diffusion in the browser</p>
+
+        <div class="flagship-body">
+          <div class="flagship-text">
+            <p>A complete core-physics code I built and validated: solves the multigroup neutron diffusion eigenvalue problem for a whole reactor core and returns <strong>k<sub>eff</sub></strong>, flux and power maps, peaking factors, control-rod worths and critical boron.</p>
+            <ul class="flagship-list">
+              <li><span>Engine</span> Fortran · mesh-centred finite differences · power iteration + red-black SOR · OpenMP</li>
+              <li><span>Cross sections</span> two-step scheme with <strong>DRAGON5</strong> lattice tables (172 groups, JEF-2.2), 11 enrichments 1.6–4.95 %</li>
+              <li><span>Validation</span> IAEA-2D/3D, BIBLIS, KOEBERG, LRA, TWIGL, analytic solutions, and the measured <strong>BEAVRS</strong> PWR</li>
+              <li><span>Interface</span> bilingual (TR/EN) web app: core wizard, live rod control, HTML reports with method notes</li>
+            </ul>
+          </div>
+
+          <div class="flagship-stats">
+            <div class="stat"><b>−7.8</b><span>pcm vs IAEA-2D reference</span></div>
+            <div class="stat"><b>6</b><span>published benchmarks reproduced</span></div>
+            <div class="stat"><b>11</b><span>DRAGON5 fuel tables</span></div>
+            <div class="stat"><b>2-D / 3-D</b><span>full cores, 2–7 energy groups</span></div>
+          </div>
+        </div>
+
+        <div class="flagship-actions">
+          <a href="https://coreforge.streamlit.app" target="_blank" class="btn btn-primary btn-glow">▶ Launch live demo</a>
+        </div>
+        <div class="tag-row flagship-tags">
+          <span class="tag">Fortran</span>
+          <span class="tag">OpenMP</span>
+          <span class="tag">Python · Streamlit</span>
+          <span class="tag">DRAGON5</span>
+          <span class="tag">Multigroup Diffusion</span>
+          <span class="tag">Benchmark Validation</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ABOUT / STACK -->
@@ -121,22 +167,6 @@
       <p class="group-desc">Solvers built from scratch for non-linear, stiff, and multi-physics heat-transfer problems.</p>
 
       <div class="project-cards">
-
-        <div class="project-card">
-          <div class="project-header">
-            <span class="project-icon">⚛️</span>
-            <h3><a href="https://coreforge.streamlit.app" target="_blank">CoreForge · Interactive 2-D / 3-D Reactor Core Simulator</a></h3>
-          </div>
-          <p>Web-based multigroup neutron diffusion code for whole reactor cores: k<sub>eff</sub>, flux and power maps, peaking factors, control-rod and soluble-boron studies. Fortran engine (mesh-centred FDM, power iteration + red-black SOR, OpenMP) behind a bilingual Streamlit interface. Two-step scheme with <strong>DRAGON5</strong> lattice tables (172 groups, JEF-2.2) for 11 enrichments, 1.6–4.95 %. Validated on IAEA-2D (<strong>−7.8 pcm</strong>), IAEA-3D, BIBLIS, KOEBERG, LRA and TWIGL, and against the measured <strong>BEAVRS</strong> zero-power critical boron. <a href="https://coreforge.streamlit.app" target="_blank" style="color:var(--accent-soft);font-weight:600;white-space:nowrap">Live demo →</a></p>
-          <div class="tag-row">
-            <span class="tag">Fortran</span>
-            <span class="tag">OpenMP</span>
-            <span class="tag">Python · Streamlit</span>
-            <span class="tag">DRAGON5</span>
-            <span class="tag">Multigroup Diffusion</span>
-            <span class="tag">Benchmark Validation</span>
-          </div>
-        </div>
 
         <div class="project-card">
           <div class="project-header">
